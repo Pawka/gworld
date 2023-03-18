@@ -22,13 +22,15 @@ func main() {
 	var seed int64 = time.Now().Unix()
 
 	const (
-		S               = 1000
-		edge    float64 = 0.7
-		scale   float64 = 200
-		style           = StyleMap
-		debug           = false
-		stretch         = 1.1
+		S       = 1000
+		edge    = 0.7
+		zoom    = 180
+		style   = StyleMap
+		debug   = false
+		stretch = 1
 	)
+
+	fmt.Printf("Seed: %d\n", seed)
 
 	rand.Seed(uint64(seed))
 	noise := opensimplex.New(seed)
@@ -38,9 +40,9 @@ func main() {
 		for j = 0; j < S; j++ {
 			var _n float64
 
-			_n = normalize(noise.Eval2(i/scale, j/scale/stretch))
+			_n = normalize(noise.Eval2(i/zoom, j/zoom/stretch))
 			if style == StyleSharp {
-				if _n > edge && _n >= rand.Float64() {
+				if _n > edge { //} && _n >= rand.Float64() {
 					dc.SetRGB255(0, 0, 0)
 				} else {
 					dc.SetRGB255(255, 255, 255)
@@ -69,14 +71,16 @@ func setColor(ctx *gg.Context, nval float64) {
 	}
 
 	colors := map[string]color{
-		"deep_water": {6, 57, 112},
-		"water":      {30, 129, 176},
-		"sand":       {234, 182, 118},
-		"grass":      {129, 185, 52},
-		"forest":     {53, 111, 70},
+		"deep_water": {92, 160, 180},
+		"water":      {131, 194, 213},
+		"sand":       {233, 204, 119},
+		"grass":      {141, 191, 113},
+		"forest":     {116, 168, 119},
+		"rocks":      {178, 172, 150},
+		"snow":       {255, 255, 255},
 	}
 
-	c := colors["forest"]
+	c := colors["snow"]
 	switch true {
 	case nval < 0.1:
 		c = colors["deep_water"]
@@ -84,8 +88,12 @@ func setColor(ctx *gg.Context, nval float64) {
 		c = colors["water"]
 	case nval < 0.4:
 		c = colors["sand"]
-	case nval < 0.7:
+	case nval < 0.6:
 		c = colors["grass"]
+	case nval < 0.85:
+		c = colors["forest"]
+	case nval < 0.9:
+		c = colors["rocks"]
 	}
 
 	ctx.SetRGB255(c.r, c.g, c.b)
